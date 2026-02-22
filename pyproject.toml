@@ -75,9 +75,9 @@ target-version = "py313"
 respect-gitignore = true # Default value, just to making explict
 
 [tool.ruff.lint]
-select = ["W", "E", "F", "I"]
+select = ["W", "E", "F", "I", "G"]
 ignore = []
-fixable = ["W", "E", "F", "I"]
+fixable = ["W", "E", "F", "I", "G"]
 unfixable = []
 
 # Allows for unused variables if underscore-prefixed.
