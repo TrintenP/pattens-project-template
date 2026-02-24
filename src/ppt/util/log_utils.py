@@ -1,8 +1,10 @@
 """Contains functions that relate to logging."""
 
+import functools
 import json
 import logging.config
 import pathlib
+import typing
 
 logger = logging.getLogger(__name__)
 
@@ -114,4 +116,39 @@ def setup_logging(
         logger.info("Handler: %s, Location: %s", handler, location)
 
 
-setup_logging()
+# More info found at: https://ankitbko.github.io/blog/2021/04/logging-in-python/
+def enable_logging(_func: typing.Callable) -> typing.Callable | None:
+    """Creates a standard logging format for functions.
+
+    Will denote the signature for a function, and if it returns any errors.
+
+    :param _func: Function to be logged.
+    :type _func: typing.Callable
+    :return: Function with standardized logging.
+    :rtype: typing.Callable
+    """
+
+    def decorate_func(func):
+        # Allows the function being wrapped to maintain signature
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            args_repr = [repr(a) for a in args]
+            kwargs_repr = [f"{kwargs=}"]
+            func_name = func.__name__
+            signature = ", ".join(args_repr + kwargs_repr)
+            logger.debug(
+                "Function %s called with args %s", func_name, signature
+            )
+
+            try:
+                returned_val = func(*args, **kwargs)
+                return returned_val
+            except Exception as e:
+                logger.exception(
+                    "Exception raised in %s. Exception: %s", func_name, str(e)
+                )
+                raise e
+
+        return wrapper
+
+    return decorate_func(_func)
