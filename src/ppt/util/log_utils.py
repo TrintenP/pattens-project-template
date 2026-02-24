@@ -2,9 +2,12 @@
 
 import functools
 import json
+import logging
 import logging.config
 import pathlib
+import time
 import typing
+
 
 logger = logging.getLogger(__name__)
 
@@ -12,25 +15,11 @@ DEFAULT_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "log_file": {
-            "format": "%(asctime)s - %(levelname)s - %(name)s - %(lineno)d - \n\t%(message)s\n",  # noqa: E501
-            "datefmt": "%Y-%m-%dT%H:%M:%SZ",
-        },
         "log_stream": {
-            "format": "%(levelname)s - %(name)s - %(lineno)d - %(message)s"
+            "format": "%(asctime)s - %(levelname)s - %(name)s - %(lineno)d - \n\t%(message)s\n",  # noqa: E501
         },
     },
     "handlers": {
-        "debug_file_handler": {
-            "class": "logging.handlers.RotatingFileHandler",
-            "level": logging.INFO,
-            "formatter": "log_file",
-            "filename": "./logs/app.log",
-            "maxBytes": 100_485_760,
-            "backupCount": 3,
-            "encoding": "utf8",
-            "mode": "a",
-        },
         "consoleHandler": {
             "class": "logging.StreamHandler",
             "formatter": "log_stream",
@@ -40,7 +29,6 @@ DEFAULT_CONFIG = {
     "root": {
         "level": logging.DEBUG,
         "handlers": [
-            "debug_file_handler",
             "consoleHandler",
         ],
     },
@@ -73,7 +61,7 @@ def generate_log_location(log_path: pathlib.Path | str | None = None) -> str:
     if not log_path.exists():
         log_path.mkdir(exist_ok=True)
 
-    return str(log_path)
+    return log_path.as_posix()
 
 
 def setup_logging(
@@ -108,9 +96,12 @@ def setup_logging(
             log_path = generate_log_location(log_file)
             log_file_info.append((handler, log_path))
 
-    logging.config.dictConfig(log_dict)
-    logger.setLevel(log_level)
-    logger.info(log_method, pathlib.Path(cfg_path).resolve())
+            logging.config.dictConfig(log_dict)
+            logging.Formatter.converter = time.gmtime  # Needed for ISO 8601
+            logger.setLevel(log_level)
+            logger.info(
+                log_method, pathlib.Path(cfg_path).resolve().as_posix()
+            )
 
     for handler, location in log_file_info:
         logger.info("Handler: %s, Location: %s", handler, location)
