@@ -10,17 +10,19 @@ This repo exists as a base Python template that can be used to kickstart a new p
 2. UV package manager
     `pip install uv`
 ## Installation
-1. Clone the GIT repo
+1. Install Make
+    - https://gnuwin32.sourceforge.net/packages/make.htm
+2. Clone the GIT repo
     - `git clone https://github.com/TrintenP/pattens-project-template.git`
-2. Change into cloned repo
+3. Change into cloned repo
     - `cd pattens-project-template`
-3. Create a virtual environment
+4. Create a virtual environment
     - `uv venv --python 3.13`
-4. Activate virtual environment
+5. Activate virtual environment
     - `.venv\Scripts\activate`
-5. Update virtual environment
+6. Update virtual environment
     - `uv sync`
-6. Run commands (See ['Usage'](#usage) Section)
+7. Run commands (See ['Usage'](#usage) Section)
 
 # Usage
 
@@ -29,7 +31,9 @@ This project will create a set of entry points that can be used in the console.
 
 `ppt`: Will parse command line for arguements.
     - Arguments:
-        - TBA
+        - `--dev`: Enable dev mode for lower level logs and testing.
+        - `--vbump <minor|major|patch>`: Bumps the corresponding version part by 1. Major.Minor.Patch
+        - `--disablecov`: Disables coverage report from being generated.
 
 ## Development Usage
 This section is to provide additional information about some already included quality of life functions added in the template.
@@ -45,6 +49,8 @@ This section is to provide additional information about some already included qu
 - `uv remove <package>`: Remove specified package from the environment
 - `uv build --no-sources`: Build the project
 
+# Updates required when using template
+- Seach for all instances of ppt and replace with value names
 
 # License
 Distributed under the MIT License. See `License.txt` for more information.

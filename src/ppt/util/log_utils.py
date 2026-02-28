@@ -8,7 +8,6 @@ import pathlib
 import time
 import typing
 
-
 logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIG = {
@@ -35,7 +34,7 @@ DEFAULT_CONFIG = {
 }
 
 
-def generate_log_location(log_path: pathlib.Path | str | None = None) -> str:
+def generate_log_location(log_path: pathlib.Path | str = "") -> str:
     """Create folder structure for logs, if any folders are missing.
 
     Take in a potential log filepath, and then verify the parent folders exist.
@@ -50,7 +49,7 @@ def generate_log_location(log_path: pathlib.Path | str | None = None) -> str:
     # Default is log folder in root of project.
     default_path = pathlib.Path(__file__).parents[3] / "logs"
 
-    if log_path is None:
+    if not log_path:
         log_path = default_path
     else:
         try:
@@ -82,33 +81,30 @@ def setup_logging(
 
     try:
         with open(cfg_path) as file:
-            log_dict = json.load(file)
+            cfg = json.load(file)
         log_method = "Configuration loaded from %s"
     except FileNotFoundError:
         log_method = "%s not found, using default configuration."
-        log_dict = DEFAULT_CONFIG
+        cfg = DEFAULT_CONFIG
 
-    # Logging module does not create folder structure for missing parents
-    log_file_info = []
-    for handler in log_dict["handlers"]:
-        log_file = log_dict["handlers"][handler].get("filename", False)
+    handlers:list[str] = [h.get("filename", "") for h in cfg.get("handlers",{}).values()]  # ty:ignore[possibly-missing-attribute, invalid-assignment]  # noqa: E501 #fmt:skip
+
+    for log_file in handlers:
         if log_file:
+            #  Logging module doesn't create missing parents
             log_path = generate_log_location(log_file)
-            log_file_info.append((handler, log_path))
+            logger.info("New log file at %s", log_path)
 
-            logging.config.dictConfig(log_dict)
+            logging.config.dictConfig(cfg)
             logging.Formatter.converter = time.gmtime  # Needed for ISO 8601
             logger.setLevel(log_level)
             logger.info(
                 log_method, pathlib.Path(cfg_path).resolve().as_posix()
             )
 
-    for handler, location in log_file_info:
-        logger.info("Handler: %s, Location: %s", handler, location)
-
 
 # More info found at: https://ankitbko.github.io/blog/2021/04/logging-in-python/
-def enable_logging(_func: typing.Callable) -> typing.Callable | None:
+def enable_logging(_func: typing.Callable) -> typing.Callable:
     """Creates a standard logging format for functions.
 
     Will denote the signature for a function, and if it returns any errors.
