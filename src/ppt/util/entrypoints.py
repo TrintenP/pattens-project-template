@@ -30,7 +30,7 @@ def generate_documentation() -> None:
     devnull = subprocess.DEVNULL
 
     # Create .rst files for Sphinx
-    gen_rtn_code = subprocess.call(gen_args, stdout=devnull)
+    gen_rtn_code = subprocess.call(gen_args, stdout=devnull)  # noqa: S603
 
     logger.debug("Generation returned: %s", gen_rtn_code)
 
@@ -38,11 +38,11 @@ def generate_documentation() -> None:
     make_run_args = [make_location, "html"]
 
     logger.info("Removing all existing docs under build.")
-    clean_rtn_code = subprocess.call(make_clean_args, stdout=devnull)
+    clean_rtn_code = subprocess.call(make_clean_args, stdout=devnull)  # noqa: S603
     logger.debug("Make Clean returned: %s", clean_rtn_code)
 
     logger.info("Creating new documentation.")
-    make_rtn_code = subprocess.call(make_run_args, stdout=devnull)
+    make_rtn_code = subprocess.call(make_run_args, stdout=devnull)  # noqa: S603
     logger.debug("Make html returned: %s", make_rtn_code)
 
     doc_location = pathlib.Path("./build/html/index.html").resolve()
@@ -62,11 +62,11 @@ def run_testing(arg_list: list | None = None) -> None:
     coverage_commands = ["coverage", "run", "-m", "pytest"]
 
     if args.disablecov:
-        subprocess.call(coverage_commands)
+        subprocess.call(coverage_commands)  # noqa: S603
         return
 
     report_gen_commands = ["coverage", "html", "-d", "coverage_report"]
-    subprocess.call(report_gen_commands)
+    subprocess.call(report_gen_commands)  # noqa: S603
 
     report_loc = pathlib.Path().cwd() / "coverage_report" / "index.html"
 
@@ -93,20 +93,16 @@ def run_local_ci() -> bool:
     # Testing
     test_commands = ["pytest"]
 
-    # Security Checking
-    bandit_commands = ["bandit", "-c", "pyproject.toml", "-r", "."]
-
     list_of_commands = [
-        (ruff_commands, "format checks"),
+        (ruff_commands, "format and security checks"),
         (ty_commands, "type checks"),
         (test_commands, "tests"),
-        (bandit_commands, "security checks"),
     ]
 
     try:
         for command_set, print_statement in list_of_commands:
             logger.debug("Running %s now!", print_statement)
-            stat = subprocess.call(command_set, stderr=devnull, stdout=devnull)
+            stat = subprocess.call(command_set, stderr=devnull, stdout=devnull)  # noqa: S603
 
             if stat == 0:
                 logger.debug("%s was successfull!", print_statement)

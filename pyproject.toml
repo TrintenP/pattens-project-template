@@ -23,7 +23,6 @@ dependencies = [
     "setuptools==78.1.0",
     "sphinx==8.2.3",
     "ty==0.0.15",
-    "bandit==1.8.3",
     "ruff==0.11.8",
     "python-json-logger>=4.0.0",
     "sphinx-pyproject>=0.3.0",
@@ -53,9 +52,6 @@ run-ci = "ppt.util.entrypoints:run_local_ci"
 version = {attr = "ppt.__version__"}
 readme =  {file = ["README.md"], content-type="text/markdown"}
 
-[tool.bandit]
-target = ["src"]
-
 [tool.coverage.run]
 source = ["src"]
 omit = ["**/__init__.py", "**/entrypoints.py"]
@@ -79,10 +75,10 @@ target-version = "py313"
 respect-gitignore = true # Default value, just to making explict
 
 [tool.ruff.lint]
-select = ["W", "E", "F", "I", "G"]
+select = ["W", "E", "F", "I", "G", "S"]
 ignore = []
 fixable = ["W", "E", "F", "I", "G"]
-unfixable = []
+unfixable = ["S"]
 
 # Allows for unused variables if underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
